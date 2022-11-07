@@ -1,3 +1,5 @@
 source("mortality.r")
 source("mortality_yearly_cumulative.r")
 source("mortality_yearly_pi.r")
+source("mortality_yearly_cumulative_bar.r")
+source("mortality_yearly_cumulative_bar_ytd.r")

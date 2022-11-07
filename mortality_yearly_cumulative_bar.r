@@ -2,32 +2,22 @@ for (ag in unique(mortality$age_group)) {
   print(ag)
   ts <- mortality %>%
     filter(age_group == ag) %>%
-    tsibble(index = date) %>%
+    tsibble(index = date)
+
+  # Mortality
+  data <- ts %>%
     filter(year <= 2021) %>%
     group_by_key() %>%
     index_by(year) %>%
     summarise(mortality = sum(mortality))
 
-  current_year <- 2019
-
-  ts_last10 <- ts %>%
-    filter(year >= current_year - 10) %>%
-    filter(year <= current_year)
-
   png(
-    paste0("./out/Germany-cum-pi-", ag, ".png"),
+    paste0("./out/Germany-cum-bar-", ag, ".png"),
     width = 1200, height = 670, res = 144
   )
   print(
-    ts_last10 %>%
-      model(
-        ets = ETS(box_cox(mortality, 0.3), ),
-        arima = ARIMA(log(mortality))
-      ) %>%
-      forecast(h = 3) %>%
-      autoplot(.vars = mortality, level = 99)
-      + autolayer(ts, .vars = mortality)
-      + ggtitle(
+    ggplot(data, aes(x = year, y = mortality)) +
+      ggtitle(
         paste0(
           "Yearly Mortality (",
           sapply(ag, URLdecode, USE.NAMES = FALSE),
@@ -37,6 +27,11 @@ for (ag in unique(mortality$age_group)) {
           "Made by @USMortality; ",
           "Datasource: Destatis"
         )
+      ) +
+      geom_col(fill = "#5383EC") +
+      geom_text(
+        aes(label = round(mortality)),
+        vjust = 2.5, colour = "white", size = 3
       ) +
       xlab("Year") +
       ylab("Deaths/100k")
